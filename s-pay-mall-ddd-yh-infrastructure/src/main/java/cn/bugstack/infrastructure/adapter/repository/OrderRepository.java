@@ -9,10 +9,13 @@ import cn.bugstack.domain.order.model.entity.ShopCartEntity;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
 import cn.bugstack.infrastructure.dao.IOrderDao;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
+import com.alibaba.fastjson.JSON;
+import com.google.common.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @Description
@@ -26,6 +29,9 @@ public class OrderRepository implements IOrderRepository {
 
     @Resource
     private IOrderDao orderDao;
+
+    @Resource
+    private EventBus eventBus;
     @Override
     public OrderEntity queryUnPayOrder(ShopCartEntity shopCartEntity) {
 
@@ -73,5 +79,31 @@ public class OrderRepository implements IOrderRepository {
                 .payUrl(payOrderEntity.getPayUrl())
                 .build();
         orderDao.updateOrderPayInfo(payOrder);
+    }
+
+    @Override
+    public void changeOrderPaySuccess(String orderId) {
+        PayOrder payOrder = new PayOrder();
+        payOrder.setOrderId(orderId);
+        payOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
+        orderDao.changeOrderPaySuccess(payOrder);
+
+        //发送MQ消息
+        eventBus.post(JSON.toJSONString(payOrder));
+    }
+
+    @Override
+    public List<String> queryNoPayNotifyOrder() {
+        return orderDao.queryNoPayNotifyOrder();
+    }
+
+    @Override
+    public List<String> queryTimeoutCloseOrderList() {
+        return orderDao.queryTimeoutCloseOrderList();
+    }
+
+    @Override
+    public boolean changeOrderClose(String orderId) {
+        return orderDao.changeOrderClose(orderId);
     }
 }

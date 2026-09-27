@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在跳转到支付页面…</title>
+</head>
+<body>
+<form name="punchout_form" method="post" action="https://openapi-sandbox.dl.alipaydev.com/gateway.do?charset=utf-8&method=alipay.trade.page.pay&sign=XLLJ5LTH%2FHYGNwpfpid1XmxnDzfkxcvB77DKQMynLGSZGghJ3KktRB6jvZoit5yVKAWpqvDdDwNlL3qu6evUNpGaWXUrcFlaYrn0CX8KfKD4VbgKo4QosY%2FF%2FY%2FYCx%2FCp49q3ahTL%2F9vAciGPyvo0DqywGyN4%2BRDV7Jje5uOxzH0wnObSiWn3tRBuWQ4pop3QrHaXjBH4jQDCUwPo9hq7DS2uVwTGqpUQ7tPUOCfhWhAQQug4nUn0WklPig8pBGo%2FRjby%2F904VsvZ84Vhx9kPkvuA7zxX3B%2FpOa23sMlKkCxlV03grgxa5X3YTtQay7refGkKP5o8eSLMh0%2BhH%2BPbA%3D%3D&return_url=https%3A%2F%2Fgaga.plus&notify_url=http%3A%2F%2F117.72.123.254%3A6000%2Fapi%2Fv1%2Falipay%2Falipay_notify_url&version=1.0&app_id=9021000168668960&sign_type=RSA2&timestamp=2026-09-26+23%3A42%3A17&alipay_sdk=alipay-sdk-java-4.38.157.ALL&format=json">
+    <input type="hidden" name="biz_content" value="{&quot;out_trade_no&quot;:&quot;3121411888541799&quot;,&quot;total_amount&quot;:&quot;1.68&quot;,&quot;subject&quot;:&quot;测试商品&quot;,&quot;product_code&quot;:&quot;FAST_INSTANT_TRADE_PAY&quot;}">
+    <input type="submit" value="立即支付" style="display:none" >
+</form>
+<p style="text-align:center;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;color:#888;margin-top:60px;">正在跳转到支付页面，请稍候…</p>
+<script>document.forms[0].submit();</script>
+</body>
+</html>

@@ -4,6 +4,8 @@ import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * @Description
  * @Author fanyiheng
@@ -16,4 +18,12 @@ public interface IOrderDao {
     PayOrder queryUnPayOrder(PayOrder payOrder);
 
     void updateOrderPayInfo(PayOrder PayOrder);
+
+    void changeOrderPaySuccess(PayOrder order);
+
+    List<String> queryNoPayNotifyOrder();
+
+    List<String> queryTimeoutCloseOrderList();
+
+    boolean changeOrderClose(String orderId);
 }

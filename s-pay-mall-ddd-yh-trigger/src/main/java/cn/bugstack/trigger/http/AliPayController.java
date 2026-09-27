@@ -106,6 +106,8 @@ public class AliPayController implements IPayService {
         log.info("支付回调，买家付款时间: {}", params.get("gmt_payment"));
         log.info("支付回调，买家付款金额: {}", params.get("buyer_pay_amount"));
         log.info("支付回调，支付回调，更新订单 {}", tradeNo);
+        // 更新订单为已支付
+        orderService.changeOrderPaySuccess(tradeNo);
 
         return "success";
     }

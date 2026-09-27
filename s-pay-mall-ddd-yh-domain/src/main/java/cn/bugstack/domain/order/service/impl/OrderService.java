@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @Description
@@ -57,6 +58,7 @@ public class OrderService extends AbstractOrderService{
         payOrderEntity.setOrderId(orderId);
         payOrderEntity.setPayUrl(form);
         payOrderEntity.setOrderStatusVO(OrderStatusVO.CREATE);
+
         orderRepository.updateOrderPayInfo(payOrderEntity);
         return payOrderEntity;
     }
@@ -66,5 +68,23 @@ public class OrderService extends AbstractOrderService{
         orderRepository.doSaveOrder(createOrderAggregate);
     }
 
+    @Override
+    public void changeOrderPaySuccess(String orderId) {
+        orderRepository.changeOrderPaySuccess(orderId);
+    }
 
+    @Override
+    public List<String> queryNoPayNotifyOrder() {
+        return orderRepository.queryNoPayNotifyOrder();
+    }
+
+    @Override
+    public List<String> queryTimeoutCloseOrderList() {
+        return orderRepository.queryTimeoutCloseOrderList();
+    }
+
+    @Override
+    public boolean changeOrderClose(String orderId) {
+        return orderRepository.changeOrderClose(orderId);
+    }
 }
