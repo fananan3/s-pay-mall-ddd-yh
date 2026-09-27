@@ -1,0 +1,16 @@
+package cn.bugstack.infrastructure.dao;
+
+import cn.bugstack.infrastructure.dao.po.PayOrder;
+import org.apache.ibatis.annotations.Mapper;
+
+/**
+ * @Description
+ * @Author fanyiheng
+ * @Date 2026/9/26 21:03
+ */
+@Mapper
+public interface IOrderDao {
+    void insert(PayOrder payOrder);
+
+    PayOrder queryUnPayOrder(PayOrder payOrder);
+}
