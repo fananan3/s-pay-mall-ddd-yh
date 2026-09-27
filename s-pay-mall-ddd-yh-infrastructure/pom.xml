@@ -18,10 +18,23 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
         <!-- 系统模块 -->
         <dependency>
             <groupId>cn.bugstack</groupId>
             <artifactId>s-pay-mall-ddd-yh-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-jackson</artifactId>
+        </dependency>
+        <dependency>
+        <groupId>com.squareup.retrofit2</groupId>
+        <artifactId>adapter-rxjava2</artifactId>
         </dependency>
     </dependencies>
 
