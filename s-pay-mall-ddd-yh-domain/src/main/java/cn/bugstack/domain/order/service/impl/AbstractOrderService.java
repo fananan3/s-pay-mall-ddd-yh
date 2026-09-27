@@ -10,9 +10,12 @@ import cn.bugstack.domain.order.model.entity.ShopCartEntity;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
 import cn.bugstack.domain.order.service.IOrderService;
 
+import com.alipay.api.AlipayApiException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 
 /**
@@ -32,6 +35,8 @@ public abstract class AbstractOrderService implements IOrderService {
 
 
     protected final IOrderRepository orderRepository;
+
+
 
     public AbstractOrderService(IOrderRepository repository, IProductPort port){
         this.productPort = port;
@@ -55,7 +60,12 @@ public abstract class AbstractOrderService implements IOrderService {
                     .build();
 
         } else if (unpaidOrderEntity != null && unpaidOrderEntity.getOrderStatusVO().equals(OrderStatusVO.CREATE)) {
-            // TODO 掉单，需要重新调用支付沙箱创建支付订单
+            //  掉单，需要重新调用支付沙箱创建支付订单
+            PayOrderEntity payOrderEntity = doPrepayOrder(unpaidOrderEntity.getProductId(), unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount());
+            return PayOrderEntity.builder()
+                    .orderId(payOrderEntity.getOrderId())
+                    .payUrl(payOrderEntity.getPayUrl())
+                    .build();
         }
         // 2. 查询商品 & 创建订单
         ProductEntity productEntity = productPort.queryProductByProductId(shopCartEntity.getProductId());
@@ -78,6 +88,9 @@ public abstract class AbstractOrderService implements IOrderService {
                 .payUrl("暂无")
                 .build();
     }
+
+    protected abstract PayOrderEntity doPrepayOrder(String productId, String productName, String orderId, BigDecimal totalAmount) throws AlipayApiException;
+
 
     protected abstract void doSaveOrder(CreateOrderAggregate createOrderAggregate);
 }

@@ -1,5 +1,6 @@
 package cn.bugstack.infrastructure.dao;
 
+import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,4 +14,6 @@ public interface IOrderDao {
     void insert(PayOrder payOrder);
 
     PayOrder queryUnPayOrder(PayOrder payOrder);
+
+    void updateOrderPayInfo(PayOrder PayOrder);
 }

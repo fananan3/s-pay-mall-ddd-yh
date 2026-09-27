@@ -63,4 +63,15 @@ public class OrderRepository implements IOrderRepository {
         payOrder.setStatus(orderEntity.getOrderStatusVO().getCode());
         orderDao.insert(payOrder);
     }
+
+    @Override
+    public void updateOrderPayInfo(PayOrderEntity payOrderEntity) {
+        PayOrder payOrder = PayOrder.builder()
+                .userId(payOrderEntity.getUserId())
+                .orderId(payOrderEntity.getOrderId())
+                .status(payOrderEntity.getOrderStatusVO().getCode())
+                .payUrl(payOrderEntity.getPayUrl())
+                .build();
+        orderDao.updateOrderPayInfo(payOrder);
+    }
 }
