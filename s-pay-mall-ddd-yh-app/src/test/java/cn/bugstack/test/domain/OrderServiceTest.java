@@ -2,6 +2,7 @@ package cn.bugstack.test.domain;
 
 import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.domain.order.model.entity.ShopCartEntity;
+import cn.bugstack.domain.order.model.valobj.MarketTypeVO;
 import cn.bugstack.domain.order.service.IOrderService;
 import cn.bugstack.domain.order.service.impl.OrderService;
 import com.alibaba.fastjson.JSON;
@@ -30,8 +31,11 @@ public class OrderServiceTest {
     public void createPayOrderEntity_test() throws Exception {
 
         ShopCartEntity shopCartEntity = new ShopCartEntity();
-        shopCartEntity.setUserId("123");
-        shopCartEntity.setProductId("123");
+        shopCartEntity.setUserId("xiaofuge");
+        shopCartEntity.setProductId("9890001");
+        shopCartEntity.setTeamId(null);
+        shopCartEntity.setActivityId(100123L);
+        shopCartEntity.setMarketTypeVO(MarketTypeVO.GROUP_BUY_MARKET);
         PayOrderEntity order = orderService.createOrder(shopCartEntity);
         log.info("请求参数：{}",shopCartEntity);
         log.info("测试结果：{}", JSON.toJSONString(order));

@@ -6,6 +6,7 @@ import cn.bugstack.domain.order.model.entity.OrderEntity;
 import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.domain.order.model.entity.ProductEntity;
 import cn.bugstack.domain.order.model.entity.ShopCartEntity;
+import cn.bugstack.domain.order.model.valobj.MarketTypeVO;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
 import cn.bugstack.infrastructure.dao.IOrderDao;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -51,6 +53,9 @@ public class OrderRepository implements IOrderRepository {
                 .orderTime(unpaidOrder.getOrderTime())
                 .totalAmount(unpaidOrder.getTotalAmount())
                 .payUrl(unpaidOrder.getPayUrl())
+                .marketType(unpaidOrder.getMarketType())
+                .marketDeductionAmount(unpaidOrder.getMarketDeductionAmount())
+                .payAmount(unpaidOrder.getPayAmount())
                 .build();
     }
 
@@ -67,6 +72,11 @@ public class OrderRepository implements IOrderRepository {
         payOrder.setOrderTime(orderEntity.getOrderTime());
         payOrder.setTotalAmount(productEntity.getPrice());
         payOrder.setStatus(orderEntity.getOrderStatusVO().getCode());
+        payOrder.setMarketType(MarketTypeVO.NO_MARKET.getCode());
+        // todo ???
+        payOrder.setMarketDeductionAmount(orderEntity.getMarketDeductionAmount());
+        payOrder.setPayAmount(productEntity.getPrice());
+        payOrder.setMarketType(orderEntity.getMarketType());
         orderDao.insert(payOrder);
     }
 
@@ -77,6 +87,9 @@ public class OrderRepository implements IOrderRepository {
                 .orderId(payOrderEntity.getOrderId())
                 .status(payOrderEntity.getOrderStatusVO().getCode())
                 .payUrl(payOrderEntity.getPayUrl())
+                .marketType(payOrderEntity.getMarketType())
+                .marketDeductionAmount(payOrderEntity.getMarketDeductionAmount())
+                .payAmount(payOrderEntity.getPayAmount())
                 .build();
         orderDao.updateOrderPayInfo(payOrder);
     }

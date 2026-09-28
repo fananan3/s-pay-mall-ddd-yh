@@ -26,4 +26,10 @@ public class OrderEntity {
     private BigDecimal totalAmount;
     private OrderStatusVO orderStatusVO;
     private String payUrl;
+    // 营销类型；0无营销、1拼团营销
+    private Integer marketType;
+    // 营销金额；优惠金额
+    private BigDecimal marketDeductionAmount;
+    // 支付金额
+    private BigDecimal payAmount;
 }

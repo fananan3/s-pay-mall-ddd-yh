@@ -1,6 +1,20 @@
 server:
   port: 8000
 
+# 应用配置
+app:
+  config:
+    # 版本，方便通过接口版本升级
+    api-version: v1
+    # 跨域，开发阶段可以设置为 * 不限制
+    cross-origin: '*'
+    # SC 渠道配置 - 拼团对接渠道值、回调通知
+    group-buy-market:
+      api-url: http://127.0.0.1:8091
+      notify-url: http://127.0.0.1:8000/api/v1/test/group_buy_notify
+      source: s01
+      chanel: c01
+
 # 线程池配置
 thread:
   pool:
@@ -17,7 +31,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:13306/s-pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    url: jdbc:mysql://127.0.0.1:13306/s-pay-mall-ddd-market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:
     pool-name: Retail_HikariCP
@@ -50,7 +64,13 @@ alipay:
   notify_url: http://117.72.123.254:6000/api/v1/alipay/alipay_notify_url
   return_url: https://gaga.plus
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
-
+# SC 渠道配置 - 拼团对接渠道值
+sc:
+  group:
+    buy:
+      market:
+        source: s01
+        chanel: c01
 
 # 日志
 logging:

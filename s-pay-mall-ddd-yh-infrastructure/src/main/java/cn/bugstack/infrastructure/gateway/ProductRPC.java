@@ -17,9 +17,9 @@ public class ProductRPC {
     public ProductDTO queryProductByProductId(String productId){
         ProductDTO productDTO = new ProductDTO();
         productDTO.setProductId(productId);
-        productDTO.setProductName("测试商品");
-        productDTO.setProductDesc("这是一个测试商品");
-        productDTO.setPrice(new BigDecimal("1.68"));
+        productDTO.setProductName("MyBatisBook");
+        productDTO.setProductDesc("MyBatisBook");
+        productDTO.setPrice(new BigDecimal("100.00"));
         return productDTO;
     }
 }
