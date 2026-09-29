@@ -1,5 +1,5 @@
 # 基础镜像
-FROM openjdk:8-jre-slim
+FROM crpi-i8oro01k2vwf5t1y.cn-chengdu.personal.cr.aliyuncs.com/yh-namespace/eclipse-temurin:8-jre-jammy
 
 # 作者
 MAINTAINER xiaofuge

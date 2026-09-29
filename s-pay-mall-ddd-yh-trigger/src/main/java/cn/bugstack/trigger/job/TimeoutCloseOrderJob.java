@@ -21,7 +21,7 @@ public class TimeoutCloseOrderJob {
     @Resource
     private IOrderService orderService;
 
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 */10 * * * ?")
     public void exec() {
         try {
             log.info("任务；超时30分钟订单关闭");
