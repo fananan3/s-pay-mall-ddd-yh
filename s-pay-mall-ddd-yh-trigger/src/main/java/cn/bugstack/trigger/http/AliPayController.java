@@ -2,6 +2,7 @@ package cn.bugstack.trigger.http;
 
 
 import cn.bugstack.api.IPayService;
+import cn.bugstack.api.dto.CreatePayOrderResponseDTO;
 import cn.bugstack.api.dto.CreatePayRequestDTO;
 import cn.bugstack.api.dto.NotifyRequestDTO;
 import cn.bugstack.api.response.Response;
@@ -47,7 +48,7 @@ public class AliPayController implements IPayService {
      */
     @Override
     @RequestMapping(value = "create_pay_order", method =  RequestMethod.POST)
-    public Response<String> createPayOrder(@RequestBody CreatePayRequestDTO createPayRequestDTO){
+    public Response<CreatePayOrderResponseDTO> createPayOrder(@RequestBody CreatePayRequestDTO createPayRequestDTO){
         try {
             log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getUserId());
             String userId = createPayRequestDTO.getUserId();
@@ -60,17 +61,33 @@ public class AliPayController implements IPayService {
                     .productId(productId)
                     .teamId(teamId)
                     .marketTypeVO(MarketTypeVO.valueOf(marketType))
+                    .activityId(createPayRequestDTO.getActivityId())
                     .build());
 
-            log.info("商品下单，根据商品ID创建支付单完成 userId:{} productId:{} orderId:{}", userId, productId, payOrderRes.getOrderId());
-            return Response.<String>builder()
+            // 请求的是拼团营销单，但订单最终没有营销优惠（market_type 回落为 0）：
+            // 说明营销锁单失败（拼团名额已用完、活动失效、拼团服务不可用等），本单已按原价创建，
+            // 必须让前端把这件事明确告诉用户，避免用户以为自己在按拼团价付款。
+            boolean marketFallback = MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(marketType)
+                    && !MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(payOrderRes.getMarketType());
+
+            log.info("商品下单，根据商品ID创建支付单完成 userId:{} productId:{} orderId:{} marketType:{} payAmount:{} marketFallback:{}",
+                    userId, productId, payOrderRes.getOrderId(), payOrderRes.getMarketType(), payOrderRes.getPayAmount(), marketFallback);
+
+            return Response.<CreatePayOrderResponseDTO>builder()
                     .code(ResponseCode.SUCCESS.getCode())
                     .info(ResponseCode.SUCCESS.getInfo())
-                    .data(payOrderRes.getPayUrl())
+                    .data(CreatePayOrderResponseDTO.builder()
+                            .orderId(payOrderRes.getOrderId())
+                            .payUrl(payOrderRes.getPayUrl())
+                            .marketType(payOrderRes.getMarketType())
+                            .payAmount(payOrderRes.getPayAmount())
+                            .marketDeductionAmount(payOrderRes.getMarketDeductionAmount())
+                            .marketFallback(marketFallback)
+                            .build())
                     .build();
         } catch (Exception e) {
             log.error("商品下单，根据商品ID创建支付单失败 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getUserId(), e);
-            return Response.<String>builder()
+            return Response.<CreatePayOrderResponseDTO>builder()
                     .code(ResponseCode.UN_ERROR.getCode())
                     .info(ResponseCode.UN_ERROR.getInfo())
                     .build();

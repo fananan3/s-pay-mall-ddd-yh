@@ -31,7 +31,10 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:13306/s-pay-mall-ddd-market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    # serverTimezone 必须与 MySQL 实例时区一致（本机 docker mysql 为 SYSTEM=+08:00，与拼团项目保持一致用 Asia/Shanghai）。
+    # 若写 UTC：Java 的 new Date() 会比 MySQL 的 now() 早 8 小时落库，
+    # 使关单 SQL「NOW() >= order_time + INTERVAL 30 MINUTE」立即成立 —— 未支付订单会被超时任务提前关闭（实测订单创建 100 秒后就被关单）。
+    url: jdbc:mysql://127.0.0.1:13306/s-pay-mall-ddd-market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:
     pool-name: Retail_HikariCP

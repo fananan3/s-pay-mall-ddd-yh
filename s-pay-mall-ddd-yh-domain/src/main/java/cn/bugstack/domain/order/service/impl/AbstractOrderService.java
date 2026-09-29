@@ -54,6 +54,10 @@ public abstract class AbstractOrderService implements IOrderService {
             return PayOrderEntity.builder()
                     .orderId(unpaidOrderEntity.getOrderId())
                     .payUrl(unpaidOrderEntity.getPayUrl())
+                    // 复用未支付单时，也要把营销信息带出去：前端据此判断本单到底是拼团价还是原价
+                    .marketType(unpaidOrderEntity.getMarketType())
+                    .payAmount(unpaidOrderEntity.getPayAmount())
+                    .marketDeductionAmount(unpaidOrderEntity.getMarketDeductionAmount())
                     .build();
 
         } else if (unpaidOrderEntity != null && unpaidOrderEntity.getOrderStatusVO().equals(OrderStatusVO.CREATE)) {
@@ -81,6 +85,9 @@ public abstract class AbstractOrderService implements IOrderService {
             return PayOrderEntity.builder()
                     .orderId(payOrderEntity.getOrderId())
                     .payUrl(payOrderEntity.getPayUrl())
+                    .marketType(payOrderEntity.getMarketType())
+                    .payAmount(payOrderEntity.getPayAmount())
+                    .marketDeductionAmount(payOrderEntity.getMarketDeductionAmount())
                     .build();
         }
         // 查询商品
@@ -117,6 +124,10 @@ public abstract class AbstractOrderService implements IOrderService {
         return PayOrderEntity.builder()
                 .orderId(orderEntity.getOrderId())
                 .payUrl(payOrderEntity.getPayUrl())
+                // 锁单成功 → marketType=1、payAmount=拼团价；锁单失败走原价兜底 → marketType=0、payAmount=原价
+                .marketType(payOrderEntity.getMarketType())
+                .payAmount(payOrderEntity.getPayAmount())
+                .marketDeductionAmount(payOrderEntity.getMarketDeductionAmount())
                 .build();
     }
 
