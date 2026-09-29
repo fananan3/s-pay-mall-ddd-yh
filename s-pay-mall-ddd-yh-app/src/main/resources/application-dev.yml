@@ -11,7 +11,7 @@ app:
     # SC 渠道配置 - 拼团对接渠道值、回调通知
     group-buy-market:
       api-url: http://127.0.0.1:8091
-      notify-url: http://127.0.0.1:8000/api/v1/test/group_buy_notify
+      notify-url: http://127.0.0.1:8000/api/v1/alipay/group_buy_notify
       source: s01
       chanel: c01
 

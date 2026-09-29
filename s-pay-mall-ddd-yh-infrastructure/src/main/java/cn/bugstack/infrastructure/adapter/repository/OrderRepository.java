@@ -1,5 +1,6 @@
 package cn.bugstack.infrastructure.adapter.repository;
 
+import cn.bugstack.domain.order.adapter.event.PaySuccessMessageEvent;
 import cn.bugstack.domain.order.adapter.repository.IOrderRepository;
 import cn.bugstack.domain.order.model.aggregate.CreateOrderAggregate;
 import cn.bugstack.domain.order.model.entity.OrderEntity;
@@ -10,6 +11,7 @@ import cn.bugstack.domain.order.model.valobj.MarketTypeVO;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
 import cn.bugstack.infrastructure.dao.IOrderDao;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
+import cn.bugstack.types.event.BaseEvent;
 import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +37,10 @@ public class OrderRepository implements IOrderRepository {
 
     @Resource
     private EventBus eventBus;
+
+    @Resource
+    private PaySuccessMessageEvent paySuccessMessageEvent;
+
     @Override
     public OrderEntity queryUnPayOrder(ShopCartEntity shopCartEntity) {
 
@@ -73,8 +80,7 @@ public class OrderRepository implements IOrderRepository {
         payOrder.setTotalAmount(productEntity.getPrice());
         payOrder.setStatus(orderEntity.getOrderStatusVO().getCode());
         payOrder.setMarketType(MarketTypeVO.NO_MARKET.getCode());
-        // todo ???
-        payOrder.setMarketDeductionAmount(orderEntity.getMarketDeductionAmount());
+        payOrder.setMarketDeductionAmount(BigDecimal.ZERO);
         payOrder.setPayAmount(productEntity.getPrice());
         payOrder.setMarketType(orderEntity.getMarketType());
         orderDao.insert(payOrder);
@@ -95,14 +101,20 @@ public class OrderRepository implements IOrderRepository {
     }
 
     @Override
-    public void changeOrderPaySuccess(String orderId) {
+    public void changeOrderPaySuccess(String orderId, Date payTime) {
         PayOrder payOrder = new PayOrder();
         payOrder.setOrderId(orderId);
         payOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
+        payOrder.setPayTime(payTime);
         orderDao.changeOrderPaySuccess(payOrder);
+        // 不走拼团营销的直接结算发货
+        BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(
+                PaySuccessMessageEvent.PaySuccessMessage.builder()
+                        .tradeNo(orderId)
+                        .build());
+        PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
 
-        //发送MQ消息
-        eventBus.post(JSON.toJSONString(payOrder));
+        eventBus.post(JSON.toJSONString(paySuccessMessage));
     }
 
     @Override
@@ -118,5 +130,51 @@ public class OrderRepository implements IOrderRepository {
     @Override
     public boolean changeOrderClose(String orderId) {
         return orderDao.changeOrderClose(orderId);
+    }
+
+    @Override
+    public void changeMarketOrderPaySuccess(String orderId) {
+        PayOrder payOrder = new PayOrder();
+        payOrder.setOrderId(orderId);
+        payOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
+        orderDao.changeOrderPaySuccess(payOrder);
+    }
+
+    @Override
+    public OrderEntity queryOrderByOrderId(String orderId) {
+        PayOrder payOrder = orderDao.queryOrderByOrderId(orderId);
+        if (payOrder == null){return null;}
+        return OrderEntity.builder()
+                .userId(payOrder.getUserId())
+                .productId(payOrder.getProductId())
+                .productName(payOrder.getProductName())
+                .orderId(payOrder.getOrderId())
+                .orderTime(payOrder.getOrderTime())
+                .totalAmount(payOrder.getTotalAmount())
+                .payUrl(payOrder.getPayUrl())
+                .marketType(payOrder.getMarketType())
+                .marketDeductionAmount(payOrder.getMarketDeductionAmount())
+                .payAmount(payOrder.getPayAmount())
+                .build();
+
+    }
+
+    @Override
+    public void changeOrderMarketSettlement(List<String> outTradeNoList) {
+        // 更新拼团结算状态
+        orderDao.changeOrderMarketSettlement(outTradeNoList);
+        // 循环成功发送消息 - 一般在公司的场景里，还会有job任务扫描超时没有结算的订单，查询订单状态。查询对方服务端的接口，会被限制一次查询多少，频次多少。
+        outTradeNoList.forEach(outTradeNo -> {
+            BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(
+                    PaySuccessMessageEvent.PaySuccessMessage.builder()
+                            .tradeNo(outTradeNo)
+                            .build());
+            PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
+
+            eventBus.post(JSON.toJSONString(paySuccessMessage));
+        });
+
+
+
     }
 }

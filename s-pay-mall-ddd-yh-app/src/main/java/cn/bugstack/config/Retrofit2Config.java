@@ -41,4 +41,5 @@ public class Retrofit2Config {
                 .addConverterFactory(JacksonConverterFactory.create()).build();
         return retrofit.create(IGroupBuyMarketService.class);
     }
+
 }

@@ -5,6 +5,8 @@ import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.domain.order.model.entity.ProductEntity;
 import cn.bugstack.domain.order.model.entity.ShopCartEntity;
 
+import java.util.Date;
+
 /**
  * @Description
  * @Author fanyiheng
@@ -14,4 +16,6 @@ public interface IProductPort {
     ProductEntity queryProductByProductId(String productId);
 
     MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId);
+
+    void settlementMarketPayOrder(String userId, String orderId, Date payTime);
 }

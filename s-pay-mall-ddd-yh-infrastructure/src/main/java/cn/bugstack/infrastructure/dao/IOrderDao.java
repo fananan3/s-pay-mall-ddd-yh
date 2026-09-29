@@ -26,4 +26,10 @@ public interface IOrderDao {
     List<String> queryTimeoutCloseOrderList();
 
     boolean changeOrderClose(String orderId);
+
+    PayOrder queryOrderByOrderId(String orderId);
+
+    void changeOrderMarketSettlement(List<String> outTradeNoList);
+
+    void changeOrderDealDone(String tradeNo);
 }

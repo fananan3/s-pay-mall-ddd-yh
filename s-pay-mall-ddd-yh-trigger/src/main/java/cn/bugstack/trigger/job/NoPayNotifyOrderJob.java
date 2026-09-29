@@ -54,7 +54,7 @@ public class NoPayNotifyOrderJob {
                 String tradeStatus = response.getTradeStatus();
 
                 if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
-                    orderService.changeOrderPaySuccess(orderId);
+                    orderService.changeOrderPaySuccess(orderId,response.getSendPayDate());
                     log.info("订单 {} 补偿成功，交易状态：{}", orderId, tradeStatus);
                 } else {
                     log.info("订单 {} 交易状态：{}，暂不处理", orderId, tradeStatus);

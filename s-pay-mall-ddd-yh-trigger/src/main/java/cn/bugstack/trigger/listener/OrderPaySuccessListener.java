@@ -1,8 +1,13 @@
 package cn.bugstack.trigger.listener;
 
+import cn.bugstack.domain.goods.service.IGoodsService;
+import cn.bugstack.domain.order.adapter.event.PaySuccessMessageEvent;
+import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.Subscribe;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author Fuzhengwei bugstack.cn @小傅哥
@@ -13,9 +18,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderPaySuccessListener {
 
+    @Resource
+    private IGoodsService goodsService;
+
     @Subscribe
-    public void handleEvent(String paySuccessMessage) {
-        log.info("收到支付成功消息，可以做接下来的事情，如；发货、充值、开户员、返利 {}", paySuccessMessage);
+    public void handleEvent(String paySuccessMessageJson) {
+        log.info("收到支付成功消息，可以做接下来的事情，如；发货、充值、开户员、返利 {}", paySuccessMessageJson);
+        PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = JSON.parseObject(paySuccessMessageJson, PaySuccessMessageEvent.PaySuccessMessage.class);
+
+        log.info("模拟发货（如；发货、充值、开户员、返利），单号:{}", paySuccessMessage.getTradeNo());
+        goodsService.changeOrderDealDone(paySuccessMessage.getTradeNo());
+
     }
 
 }
