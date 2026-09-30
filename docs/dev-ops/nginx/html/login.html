@@ -237,7 +237,7 @@
         }
 
         // 获取二维码 ticket
-        fetch('http://localhost:8000/api/v1/login/weixin_qrcode_ticket')
+        fetch('/api/v1/login/weixin_qrcode_ticket')
             .then(response => response.json())
             .then(data => {
                 if (data.code === "0000") {
@@ -261,7 +261,7 @@
             });
 
         function checkLoginStatus(ticket, intervalId) {
-            fetch(`http://localhost:8000/api/v1/login/check_login?ticket=${ticket}`)
+            fetch(`/api/v1/login/check_login?ticket=${ticket}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.code === "0000") {

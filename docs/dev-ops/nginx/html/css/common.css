@@ -1,0 +1,85 @@
+/* =====================================================================
+ * 全局变量 & 基础样式
+ * 来自 group-buy-market 首页（css/common.css），s-pay-mall 直接复用同一套设计变量
+ * ===================================================================== */
+:root {
+    --pdd-red: #e02e24;      /* 主题红：按钮/价格 */
+    --pdd-orange: #ff5706;
+    --pdd-blue: #29a3f0;
+    --pdd-green: #2e9e3e;    /* 支付完成按钮绿 */
+    --bg-gray: #f4f4f4;
+    --text-main: #151515;
+    --text-sub: #9c9c9c;
+    --line: #ececec;
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-gray);
+    color: var(--text-main);
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* ==================== 通用按钮 ==================== */
+.btn {
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-small { font-size: 12px; padding: 5px 12px; }
+.btn-primary { background: var(--pdd-red); color: #fff; font-weight: bold; }
+.btn-blue { background: var(--pdd-blue); color: #fff; font-weight: bold; }
+.btn-green { background: var(--pdd-green); color: #fff; font-weight: bold; }
+.btn-ghost { background: #fff; color: #666; border: 1px solid #dcdcdc; }
+.btn-pill { border-radius: 999px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ==================== 顶部栏 ==================== */
+.app-header {
+    position: sticky; top: 0; z-index: 100;
+    background: #fff; display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; border-bottom: 1px solid var(--line);
+}
+.logo-area { display: flex; align-items: center; }
+.brand-logo { color: var(--pdd-red); font-size: 18px; font-weight: 800; }
+.user-actions { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-sub); }
+.user-name { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.logout-btn { color: var(--pdd-red); cursor: pointer; }
+
+/* ==================== 轻提示 ==================== */
+.gbm-toast {
+    position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 12px);
+    max-width: 90%; padding: 10px 16px; border-radius: 20px;
+    background: rgba(0, 0, 0, .82); color: #fff; font-size: 13px;
+    text-align: center; z-index: 300; opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s;
+}
+.gbm-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.gbm-toast.success { background: rgba(46, 158, 62, .95); }
+.gbm-toast.error { background: rgba(224, 46, 36, .95); }
+
+/* ==================== 沙箱测试账号 ==================== */
+.sandbox-card {
+    margin: 8px 8px 0; padding: 9px 12px;
+    background: #fff; border-radius: var(--radius);
+    font-size: 11px; color: var(--text-sub); line-height: 1.7;
+    word-break: break-all;
+}
+.sandbox-card strong { display: block; margin-bottom: 2px; color: var(--text-main); font-size: 12px; }
+.sandbox-card .copyable { color: var(--pdd-red); cursor: pointer; }

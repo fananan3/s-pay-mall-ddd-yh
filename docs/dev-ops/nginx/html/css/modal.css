@@ -1,0 +1,57 @@
+/* =====================================================================
+ * 支付确认弹窗
+ * 结构沿用 group-buy-market 的弹窗（css/modal.css），
+ * 内容改为 s-pay-mall 的支付宝沙箱支付：显示实付金额、必要时提示"按原价支付"
+ * ===================================================================== */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, .55); z-index: 200;
+    display: flex; align-items: flex-end; justify-content: center;
+}
+.modal-content {
+    width: 100%; max-width: 480px;
+    background: #fff; border-radius: 16px 16px 0 0;
+    padding: 22px 20px 24px; position: relative;
+    text-align: center;
+    animation: slideUp .25s ease-out;
+}
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal-close {
+    position: absolute; right: 14px; top: 10px;
+    border: none; background: none; color: #bbb;
+    font-size: 24px; line-height: 1; cursor: pointer;
+}
+
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-amount { margin-top: 8px; font-size: 13px; color: var(--text-sub); }
+.modal-amount strong { color: var(--pdd-red); font-size: 22px; }
+.modal-order {
+    margin-top: 4px; font-size: 11px; color: var(--text-sub);
+    font-variant-numeric: tabular-nums; min-height: 14px;
+}
+
+/* 拼团优惠没生效（锁单失败 → 按原价兜底）时的提示 */
+.pay-warn {
+    margin: 14px 0 0; padding: 9px 10px;
+    background: #fff8c9; border: 1px solid #ffe680; border-radius: 8px;
+    font-size: 12px; color: #8a6100; line-height: 1.7; text-align: left;
+}
+.pay-warn strong { display: block; margin-bottom: 2px; color: var(--pdd-red); font-size: 13px; }
+
+/* 沙箱买家账号提示 */
+.pay-account {
+    margin-top: 14px; padding: 9px 10px;
+    background: #f7f7f7; border-radius: 8px;
+    font-size: 11px; color: var(--text-sub); line-height: 1.8; text-align: left;
+}
+.pay-account strong { display: block; margin-bottom: 2px; color: var(--text-main); font-size: 12px; }
+.pay-account .copyable { color: var(--pdd-red); cursor: pointer; }
+
+.qr-tip { font-size: 11px; color: var(--text-sub); margin-top: 10px; }
+
+.modal-footer { display: flex; gap: 12px; margin-top: 20px; }
+.modal-footer .btn { flex: 1; padding: 11px 0; font-size: 14px; border-radius: 22px; }
