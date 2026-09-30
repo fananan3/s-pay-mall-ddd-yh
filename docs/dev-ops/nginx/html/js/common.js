@@ -12,9 +12,10 @@ const _qs = new URLSearchParams(location.search);
 const trimSlash = (s) => String(s || '').replace(/\/+$/, '');
 
 /** 小型支付商城地址（下单、支付都走这里） */
-const sPayMallUrl = trimSlash(_qs.get('pay') || '');            // 空 = 同源（nginx 分流 /api/v1/alipay|login|weixin）
+// ★ 本地调试版：静态页面跑在别的端口（如 8899），接口指向本机服务
+const sPayMallUrl = trimSlash(_qs.get('pay') || 'http://127.0.0.1:8000');
 /** 拼团营销系统地址（只用于查询拼团信息） */
-const groupBuyMarketUrl = trimSlash(_qs.get('market') || '');   // 空 = 同源（nginx 分流 /api/v1/gbm）
+const groupBuyMarketUrl = trimSlash(_qs.get('market') || 'http://127.0.0.1:8091');
 
 /** 与拼团系统 sku 表一致的渠道/商品参数 */
 const MARKET_SOURCE = 's01';

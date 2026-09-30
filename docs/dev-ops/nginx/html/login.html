@@ -217,6 +217,9 @@
 </div>
 
 <script>
+    // ★ 本地调试版：静态页可能跑在 8899 等端口，接口直接指向本机 s-pay-mall(8000)
+    var API_BASE = 'http://127.0.0.1:8000';
+
     document.addEventListener("DOMContentLoaded", function () {
         var qrCodeImg = document.getElementById('qr-code-img');
         var qrLoading = document.getElementById('qrLoading');
@@ -237,7 +240,7 @@
         }
 
         // 获取二维码 ticket
-        fetch('/api/v1/login/weixin_qrcode_ticket')
+        fetch(API_BASE + '/api/v1/login/weixin_qrcode_ticket')
             .then(response => response.json())
             .then(data => {
                 if (data.code === "0000") {
@@ -261,7 +264,7 @@
             });
 
         function checkLoginStatus(ticket, intervalId) {
-            fetch(`/api/v1/login/check_login?ticket=${ticket}`)
+            fetch(API_BASE + '/api/v1/login/check_login?ticket=' + ticket)
                 .then(response => response.json())
                 .then(data => {
                     if (data.code === "0000") {
