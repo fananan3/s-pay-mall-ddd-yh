@@ -11,6 +11,7 @@ import cn.bugstack.domain.order.model.valobj.MarketTypeVO;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
 import cn.bugstack.infrastructure.dao.IOrderDao;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
+import cn.bugstack.infrastructure.event.EventPublisher;
 import cn.bugstack.types.event.BaseEvent;
 import com.alibaba.fastjson.JSON;
 import com.google.common.eventbus.EventBus;
@@ -37,6 +38,9 @@ public class OrderRepository implements IOrderRepository {
 
     @Resource
     private EventBus eventBus;
+
+    @Resource
+    private EventPublisher eventPublisher;
 
     @Resource
     private PaySuccessMessageEvent paySuccessMessageEvent;
@@ -114,7 +118,9 @@ public class OrderRepository implements IOrderRepository {
                         .build());
         PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
 
-        eventBus.post(JSON.toJSONString(paySuccessMessage));
+        // 旧版发送消息方式
+        // eventBus.post(JSON.toJSONString(paySuccessMessage));
+        eventPublisher.publish(paySuccessMessageEvent.topic(), JSON.toJSONString(paySuccessMessage));
     }
 
     @Override
@@ -138,6 +144,18 @@ public class OrderRepository implements IOrderRepository {
         payOrder.setOrderId(orderId);
         payOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
         orderDao.changeOrderPaySuccess(payOrder);
+        // 不走拼团营销的直接结算发货
+        BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(
+                PaySuccessMessageEvent.PaySuccessMessage.builder()
+                        .tradeNo(orderId)
+                        .build());
+        PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
+
+
+        // 旧版发送消息方式
+        // eventBus.post(JSON.toJSONString(paySuccessMessage));
+
+        eventPublisher.publish(paySuccessMessageEvent.topic(), JSON.toJSONString(paySuccessMessage));
     }
 
     @Override
@@ -171,7 +189,9 @@ public class OrderRepository implements IOrderRepository {
                             .build());
             PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
 
-            eventBus.post(JSON.toJSONString(paySuccessMessage));
+            // 旧版发送消息方式
+            // eventBus.post(JSON.toJSONString(paySuccessMessage));
+            eventPublisher.publish(paySuccessMessageEvent.topic(), JSON.toJSONString(paySuccessMessage));
         });
 
 
