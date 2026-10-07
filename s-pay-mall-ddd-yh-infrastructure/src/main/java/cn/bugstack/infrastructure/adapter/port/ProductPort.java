@@ -121,4 +121,29 @@ public class ProductPort implements IProductPort {
         }
 
     }
+
+    @Override
+    public void refundMarketPayOrder(String userId, String orderId) {
+        RefundMarketPayOrderRequestDTO requestDTO = new RefundMarketPayOrderRequestDTO();
+        requestDTO.setSource(source);
+        requestDTO.setChannel(chanel);
+        requestDTO.setUserId(userId);
+        requestDTO.setOutTradeNo(orderId);
+        try {
+            Call<Response<RefundMarketPayOrderResponseDTO>> call = groupBuyMarketService.refundMarketPayOrder(requestDTO);
+
+            // 获取结果
+            Response<RefundMarketPayOrderResponseDTO> response = call.execute().body();
+            log.info("营销退单{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
+            if (null == response) return;
+
+            // 异常判断
+            if (!"0000".equals(response.getCode())) {
+                throw new AppException(response.getCode(), response.getInfo());
+            }
+
+        } catch (Exception e) {
+            log.error("营销退单失败{}", userId, e);
+        }
+    }
 }

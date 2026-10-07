@@ -78,6 +78,13 @@ spring:
           routing_key: topic.team_success
           # 消费队列 - 每个系统有自己的消费队列
           queue: s_pay_mall_queue_2_topic_team_success
+        topic_team_refund:
+          # 绑定交换机 - 消息提供者的交换机
+          exchange: group_buy_market_exchange
+          # 消息主题
+          routing_key: topic.team_refund
+          # 消费队列
+          queue: s_pay_mall_queue_2_topic_team_refund
         # 主题配置
         topic_order_pay_success:
           # 绑定交换机

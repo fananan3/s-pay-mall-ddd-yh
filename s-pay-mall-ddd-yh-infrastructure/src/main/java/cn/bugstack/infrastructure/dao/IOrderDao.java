@@ -3,6 +3,7 @@ package cn.bugstack.infrastructure.dao;
 import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.infrastructure.dao.po.PayOrder;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -33,9 +34,18 @@ public interface IOrderDao {
 
     void changeOrderDealDone(String tradeNo);
 
-    List<PayOrder> queryUserOrderList(String userId, Long lastId, Integer pageSize);
+    /**
+     * 我的订单列表（游标分页）
+     * 多参数必须加 @Param：否则 XML 里 #{userId}/#{lastId}/#{pageSize} 解析不到，
+     * 会报 Parameter 'lastId' not found. Available parameters are [arg0, arg1, arg2...]
+     */
+    List<PayOrder> queryUserOrderList(@Param("userId") String userId,
+                                      @Param("lastId") Long lastId,
+                                      @Param("pageSize") Integer pageSize);
 
     PayOrder queryOrderByUserIdAndOrderId(String userId, String orderId);
 
     boolean refundOrder(String userId, String orderId);
+
+    boolean refundMarketOrder(@Param("userId") String userId, @Param("orderId") String orderId);
 }

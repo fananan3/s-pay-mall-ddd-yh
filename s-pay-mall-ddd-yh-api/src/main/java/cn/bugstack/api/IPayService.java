@@ -17,4 +17,7 @@ public interface IPayService {
 
     Response<RefundOrderResponseDTO> refundOrder(RefundOrderRequestDTO requestDTO);
 
+    Response<String> activePayNotify(String outTradeNo);
+
+
 }

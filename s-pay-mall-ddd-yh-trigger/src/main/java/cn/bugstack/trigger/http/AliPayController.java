@@ -13,6 +13,7 @@ import cn.bugstack.types.common.Constants;
 import cn.bugstack.types.enums.ResponseCode;
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,8 @@ public class AliPayController implements IPayService {
     @Resource
     private IOrderService orderService;
 
+
+
     /**
      * http://localhost:8080/api/v1/alipay/create_pay_order
      *
@@ -51,7 +54,7 @@ public class AliPayController implements IPayService {
     @RequestMapping(value = "create_pay_order", method =  RequestMethod.POST)
     public Response<CreatePayOrderResponseDTO> createPayOrder(@RequestBody CreatePayRequestDTO createPayRequestDTO){
         try {
-            log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getUserId());
+            log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getProductId());
             String userId = createPayRequestDTO.getUserId();
             String productId = createPayRequestDTO.getProductId();
             String teamId = createPayRequestDTO.getTeamId();
@@ -231,7 +234,9 @@ public class AliPayController implements IPayService {
             String orderId = requestDTO.getOrderId();
 
             // 执行退单操作
-            boolean success = orderService.refundOrder(userId, orderId);
+            // boolean success = orderService.refundOrder(userId, orderId);
+            // 执行退单操作
+            boolean success = orderService.refundMarketOrder(userId, orderId);
 
             RefundOrderResponseDTO responseDTO = new RefundOrderResponseDTO();
             responseDTO.setSuccess(success);
@@ -257,6 +262,17 @@ public class AliPayController implements IPayService {
                     .data(responseDTO)
                     .build();
         }
+    }
+
+
+    /**
+     * 测试回调接口 - 主动查询支付宝交易状态
+     * @param outTradeNo 商户订单号
+     * @return 处理结果
+     */
+    @Override
+    public Response<String> activePayNotify(String outTradeNo) {
+        return null;
     }
 
 

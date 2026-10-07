@@ -28,5 +28,7 @@ public class LockMarketPayOrderResponseDTO {
     private BigDecimal payPrice;
     /** 交易订单状态 */
     private Integer tradeOrderStatus;
+    /** 拼团队伍ID（拼团系统新增字段：开团返回新建的 teamId，参团返回加入的 teamId） */
+    private String teamId;
 
 }
