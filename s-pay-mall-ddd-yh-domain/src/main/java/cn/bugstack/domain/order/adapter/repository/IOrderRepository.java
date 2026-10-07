@@ -32,4 +32,10 @@ public interface IOrderRepository {
     OrderEntity queryOrderByOrderId(String orderId);
 
     void changeOrderMarketSettlement(List<String> outTradeNoList);
+
+    List<OrderEntity> queryUserOrderList(String userId, Long lastId, Integer pageSize);
+
+    OrderEntity queryOrderByUserIdAndOrderId(String userId, String orderId);
+
+    boolean refundOrder(String userId, String orderId);
 }

@@ -1,8 +1,6 @@
 package cn.bugstack.api;
 
-import cn.bugstack.api.dto.CreatePayOrderResponseDTO;
-import cn.bugstack.api.dto.CreatePayRequestDTO;
-import cn.bugstack.api.dto.NotifyRequestDTO;
+import cn.bugstack.api.dto.*;
 import cn.bugstack.api.response.Response;
 
 /**
@@ -14,4 +12,9 @@ public interface IPayService {
     Response<CreatePayOrderResponseDTO> createPayOrder(CreatePayRequestDTO createPayRequestDTO);
 
     String groupBuyNotify(NotifyRequestDTO requestDTO);
+
+    Response<QueryOrderListResponseDTO> queryUserOrderList(QueryOrderListRequestDTO requestDTO);
+
+    Response<RefundOrderResponseDTO> refundOrder(RefundOrderRequestDTO requestDTO);
+
 }

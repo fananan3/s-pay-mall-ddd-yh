@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -137,4 +138,9 @@ public abstract class AbstractOrderService implements IOrderService {
 
     protected abstract MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId);
     protected abstract void doSaveOrder(CreateOrderAggregate createOrderAggregate);
+
+    @Override
+    public List<OrderEntity> queryUserOrderList(String userId, Long lastId, Integer pageSize) {
+        return orderRepository.queryUserOrderList(userId, lastId, pageSize);
+    }
 }

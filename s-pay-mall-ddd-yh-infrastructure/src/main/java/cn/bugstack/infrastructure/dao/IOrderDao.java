@@ -32,4 +32,10 @@ public interface IOrderDao {
     void changeOrderMarketSettlement(List<String> outTradeNoList);
 
     void changeOrderDealDone(String tradeNo);
+
+    List<PayOrder> queryUserOrderList(String userId, Long lastId, Integer pageSize);
+
+    PayOrder queryOrderByUserIdAndOrderId(String userId, String orderId);
+
+    boolean refundOrder(String userId, String orderId);
 }
