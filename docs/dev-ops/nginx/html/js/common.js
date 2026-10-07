@@ -102,6 +102,38 @@ function createPayOrder(body) {
     return postJson(sPayMallUrl + '/api/v1/alipay/create_pay_order', body);
 }
 
+/**
+ * 查询我的订单列表（游标分页，走 s-pay-mall）
+ * POST {sPayMallUrl}/api/v1/alipay/query_user_order_list
+ * @param {string} userId 当前登录用户
+ * @param {number|null} lastId 上一页返回的 lastId；第一页传 null
+ * @param {number} pageSize 每页条数（默认 10）
+ * 返回 data：{ orderList:[{ id, userId, productId, productName, orderId, orderTime,
+ *              totalAmount, status, payUrl, marketType, marketDeductionAmount,
+ *              payAmount, payTime }], hasMore, lastId }
+ *   status 取值：CREATE / PAY_WAIT / PAY_SUCCESS / DEAL_DONE / CLOSE
+ */
+function queryUserOrderList(userId, lastId, pageSize) {
+    return postJson(sPayMallUrl + '/api/v1/alipay/query_user_order_list', {
+        userId: userId,
+        lastId: (lastId === undefined ? null : lastId),
+        pageSize: pageSize || 10
+    });
+}
+
+/**
+ * 退单（走 s-pay-mall）
+ * POST {sPayMallUrl}/api/v1/alipay/refund_order
+ * 返回 data：{ success, message, orderId }
+ *   注意：业务失败时 code 仍是 0000，需再看 data.success
+ */
+function refundOrder(userId, orderId) {
+    return postJson(sPayMallUrl + '/api/v1/alipay/refund_order', {
+        userId: userId,
+        orderId: orderId
+    });
+}
+
 /* ------------------------- 小工具 ------------------------- */
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';

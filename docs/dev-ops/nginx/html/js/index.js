@@ -214,6 +214,8 @@ function doOrder(teamId, isGroupBuy) {
 
             // 下单成功后静默刷新：让列表里的我变成「我的团 · 待支付 / 继续支付」
             loadMarketConfig({ silent: true });
+            // 新订单也要立刻出现在「我的订单」里
+            if (typeof window.refreshOrders === 'function') window.refreshOrders();
         })
         .catch(function (err) {
             console.error('下单失败:', err);

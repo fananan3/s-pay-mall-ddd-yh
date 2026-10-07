@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="css/common.css?v=20260929">
     <link rel="stylesheet" href="css/index.css?v=20260929">
     <link rel="stylesheet" href="css/modal.css?v=20260929">
+    <!-- 我的订单（列表 / 继续支付 / 退单） -->
+    <link rel="stylesheet" href="css/orders.css?v=20261007">
 </head>
 <body>
 
@@ -67,6 +69,24 @@
     <div class="member-list" id="memberList"></div>
 </section>
 
+<!-- 我的订单：查询列表 + 继续支付 + 退单 -->
+<section class="orders-section" id="ordersSection">
+    <div class="orders-header">
+        <span class="orders-title">我的订单</span>
+        <span class="orders-header-right">
+            <span class="orders-count" id="ordersCount"></span>
+            <button class="btn btn-ghost btn-small" id="ordersRefreshBtn" type="button">刷新</button>
+        </span>
+    </div>
+    <!-- 加载中 / 空列表 / 接口异常时的提示 -->
+    <div class="orders-tip" id="ordersTip">加载中…</div>
+    <div class="order-list" id="orderList"></div>
+    <div class="orders-footer">
+        <button class="btn btn-ghost btn-pill" id="ordersMoreBtn" type="button" hidden>加载更多</button>
+        <div class="orders-end" id="ordersEnd" hidden>没有更多订单了</div>
+    </div>
+</section>
+
 <!-- 按钮为什么是灰的，直接写出来 -->
 <div class="buy-hint" id="buyHint" hidden></div>
 
@@ -95,5 +115,6 @@
 <script src="js/common.js?v=20260929"></script>
 <script src="js/index.js?v=20260929"></script>
 <script src="js/pay-modal.js?v=20260929"></script>
+<script src="js/orders.js?v=20261007"></script>
 </body>
 </html>

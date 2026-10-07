@@ -93,7 +93,7 @@
         from pay_order
         where user_id = #{userId}
         <if test="lastId != null">
-            and id &lt #{lastId}
+            and id > #{lastId}
         </if>
         order by id asc
         limit #{pageSize}
