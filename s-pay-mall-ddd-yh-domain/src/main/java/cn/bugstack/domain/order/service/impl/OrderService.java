@@ -101,9 +101,14 @@ public class OrderService extends AbstractOrderService{
         if(MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(orderEntity.getMarketType())){
             orderRepository.changeMarketOrderPaySuccess(orderId);
             // 发起营销结算。这个过程可以是http/rpc直接调用，也可以发一个商城交易支付完成的消息，之后拼团系统自己接收做结算。
-            productPort.settlementMarketPayOrder(orderEntity.getUserId(), orderId, payTime);
-            // 注意；在公司中，发起结算的http/rpc调用可能会失败，这个时候还会有增加job任务补偿。条件为，检查一笔走了拼团的订单，超过n分钟后，仍然没有做拼团结算状态变更。
-            // 我们这里失败了，会抛异常，借助支付宝回调/job来重试。你可以单独实现一个独立的job来处理。
+            try{
+                productPort.settlementMarketPayOrder(orderEntity.getUserId(), orderId, payTime);
+            }catch (Exception e){
+                // 注意；在公司中，发起结算的http/rpc调用可能会失败，这个时候还会有增加job任务补偿。条件为，检查一笔走了拼团的订单，超过n分钟后，仍然没有做拼团结算状态变更。
+                // 我们这里失败了，会抛异常，借助支付宝回调/job来重试。你可以单独实现一个独立的job来处理。
+                orderRepository.changeMarketOrderWaitSettlement(orderId);
+            }
+
         }
 
         orderRepository.changeOrderPaySuccess(orderId,payTime);
@@ -175,11 +180,10 @@ public class OrderService extends AbstractOrderService{
 
         // 3. 对于营销类型的单子，调用拼团执行组队退单
         productPort.refundMarketPayOrder(userId, orderId);
+        if (null == orderEntity.getPayTime()) {                      // ② 没付款：不存在退款，直接关单
+            return orderRepository.refundOrder(userId, orderId);     //    → CLOSE
+        }
 
-        // 4. 执行退单操作；CREATE 新创建订单，不需要退款
-        if (OrderStatusVO.CREATE.getCode().equals(status) || OrderStatusVO.PAY_WAIT.getCode().equals(status)) {
-            return orderRepository.refundOrder(userId, orderId);
-        } else {
             boolean result = orderRepository.refundMarketOrder(userId, orderId);
             if (result) {
                 log.info("退单成功 userId:{} orderId:{}", userId, orderId);
@@ -187,7 +191,7 @@ public class OrderService extends AbstractOrderService{
                 log.warn("退单失败 userId:{} orderId:{}", userId, orderId);
             }
             return result;
-        }
+
     }
 
     @Override
@@ -211,5 +215,33 @@ public class OrderService extends AbstractOrderService{
         orderRepository.refundOrder(userId, orderId);
 
         return true;
+    }
+
+    @Override
+    public OrderEntity queryOrder(String userId, String orderId) {
+        return orderRepository.queryOrderByUserIdAndOrderId(userId, orderId);
+    }
+
+    @Override
+    public void closeRefundOrder(String userId, String outTradeNo) {
+        // 1. 查询订单信息，验证订单是否存在且属于该用户
+        OrderEntity orderEntity = orderRepository.queryOrderByUserIdAndOrderId(userId, outTradeNo);
+        if (null == orderEntity) {
+            log.warn("关闭退单失败，订单不存在或不属于该用户 userId:{} orderId:{}", userId, outTradeNo);
+            return;
+        }
+        // 2. 检查订单状态，只有create、pay_wait、pay_success、deal_done状态的订单可以关闭退单
+        String status = orderEntity.getOrderStatusVO().getCode();
+        if (OrderStatusVO.CLOSE.getCode().equals(status)) {
+            log.warn("关闭退单失败，订单已关闭 userId:{} orderId:{} status:{}", userId, outTradeNo, status);
+            return;
+        }
+        // 3. 执行关闭退单操作
+        boolean result = orderRepository.closeRefundOrder(userId, outTradeNo);
+        if (result) {
+            log.info("关闭退单成功 userId:{} orderId:{}", userId, outTradeNo);
+        } else {
+            log.warn("关闭退单失败 userId:{} orderId:{}", userId, outTradeNo);
+        }
     }
 }

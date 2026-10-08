@@ -233,10 +233,15 @@ public class AliPayController implements IPayService {
             String userId = requestDTO.getUserId();
             String orderId = requestDTO.getOrderId();
 
+            OrderEntity order = orderService.queryOrder(userId, orderId);
+
             // 执行退单操作
             // boolean success = orderService.refundOrder(userId, orderId);
             // 执行退单操作
-            boolean success = orderService.refundMarketOrder(userId, orderId);
+//            boolean success = orderService.refundMarketOrder(userId, orderId);
+            boolean success = MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(order.getMarketType())
+                    ? orderService.refundMarketOrder(userId, orderId)   // 营销单：调拼团 + 按 gbm 结果处理
+                    : orderService.refundPayOrder(userId, orderId);      // 单买单：**完全不碰拼团**，直接支付宝退款 + CLOSE
 
             RefundOrderResponseDTO responseDTO = new RefundOrderResponseDTO();
             responseDTO.setSuccess(success);

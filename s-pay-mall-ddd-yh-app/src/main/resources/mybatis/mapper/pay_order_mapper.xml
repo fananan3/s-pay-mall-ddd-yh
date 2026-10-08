@@ -74,6 +74,16 @@
         set status = 'WAIT_REFUND', update_time = now()
         where user_id = #{userId} and order_id = #{orderId}
     </update>
+    <update id="closeRefundOrder">
+        update pay_order
+        set status = 'CLOSE', update_time = now()
+        where user_id = #{userId} and order_id = #{orderId}
+    </update>
+    <update id="changeMarketOrderWaitSettlement">
+        update pay_order
+        set status = 'WAIT_SETTLEMENT', update_time = now()
+        where user_id = #{userId} and order_id = #{orderId}
+    </update>
     <select id="queryTimeoutCloseOrderList" parameterType="java.lang.String" resultType="java.lang.String">
         SELECT order_id as orderId FROM pay_order
         WHERE status = 'PAY_WAIT' AND NOW() >= order_time + INTERVAL 30 MINUTE

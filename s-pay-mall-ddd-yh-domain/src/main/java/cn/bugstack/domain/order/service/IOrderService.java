@@ -42,4 +42,8 @@ public interface IOrderService {
      * 接收拼团退单消息
      */
     boolean refundPayOrder(String userId, String outTradeNo) throws AlipayApiException;
+
+    OrderEntity queryOrder(String userId, String orderId);
+
+    void closeRefundOrder(String userId, String outTradeNo);
 }

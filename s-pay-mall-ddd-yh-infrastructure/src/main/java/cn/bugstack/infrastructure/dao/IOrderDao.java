@@ -45,7 +45,11 @@ public interface IOrderDao {
 
     PayOrder queryOrderByUserIdAndOrderId(String userId, String orderId);
 
-    boolean refundOrder(String userId, String orderId);
+    boolean refundOrder(@Param("userId") String userId, @Param("orderId") String orderId);
 
     boolean refundMarketOrder(@Param("userId") String userId, @Param("orderId") String orderId);
+
+    boolean closeRefundOrder(String userId, String outTradeNo);
+
+    void changeMarketOrderWaitSettlement(PayOrder payOrder);
 }

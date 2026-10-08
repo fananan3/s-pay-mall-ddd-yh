@@ -40,4 +40,8 @@ public interface IOrderRepository {
     boolean refundOrder(String userId, String orderId);
 
     boolean refundMarketOrder(String userId, String orderId);
+
+    boolean closeRefundOrder(String userId, String outTradeNo);
+
+    void changeMarketOrderWaitSettlement(String orderId);
 }

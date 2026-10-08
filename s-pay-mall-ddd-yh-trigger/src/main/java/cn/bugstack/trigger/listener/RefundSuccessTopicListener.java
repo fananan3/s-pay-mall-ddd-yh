@@ -41,8 +41,15 @@ public class RefundSuccessTopicListener {
             log.info("退单回调，发起退款 {}", message);
             TeamRefundSuccessRequestDTO requestDTO = JSON.parseObject(message, TeamRefundSuccessRequestDTO.class);
             String type = requestDTO.getType();
+            if ("unpaid_unlock".equals(type)) {
+                // 未支付：没收到钱，不需要调支付宝，直接把商城订单关掉（要幂等）
+                orderService.closeRefundOrder(requestDTO.getUserId(), requestDTO.getOutTradeNo());
+                return;
+            }
             if ("paid_unformed".equals(type) || "paid_formed".equals(type)) {
                 orderService.refundPayOrder(requestDTO.getUserId(), requestDTO.getOutTradeNo());
+            }else {
+                log.warn("未知退单类型，忽略 type:{} message:{}", type, message);
             }
         } catch (AlipayApiException exception){
             throw new RuntimeException(exception);
