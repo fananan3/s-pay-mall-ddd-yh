@@ -1,6 +1,7 @@
 package cn.bugstack.domain.order.model.entity;
 
 
+import java.util.Date;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

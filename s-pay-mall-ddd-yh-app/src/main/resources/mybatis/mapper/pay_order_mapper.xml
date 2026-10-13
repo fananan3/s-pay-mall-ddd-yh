@@ -86,7 +86,9 @@
     </update>
     <select id="queryTimeoutCloseOrderList" parameterType="java.lang.String" resultType="java.lang.String">
         SELECT order_id as orderId FROM pay_order
-        WHERE status = 'PAY_WAIT' AND NOW() >= order_time + INTERVAL 30 MINUTE
+        WHERE status = 'PAY_WAIT'
+          AND ((market_type = 1 AND NOW() >= order_time + INTERVAL 15 MINUTE)
+               OR (market_type IS NULL OR market_type = 0) AND NOW() >= order_time + INTERVAL 15 MINUTE)
         ORDER BY id ASC
         LIMIT 50
     </select>
@@ -119,4 +121,14 @@
 
     </select>
 
+    <select id="queryWaitRefundOrderList" resultType="cn.bugstack.infrastructure.dao.po.PayOrder">
+        select user_id as userId, order_id as orderId from pay_order
+        where status = 'WAIT_REFUND'
+        order by id asc
+        limit 100
+    </select>
+    <update id="changeOrderWaitRefund">
+        update pay_order set status = 'WAIT_REFUND', update_time = now()
+        where user_id = #{userId} and order_id = #{orderId}
+    </update>
 </mapper>

@@ -46,4 +46,6 @@ public interface IOrderService {
     OrderEntity queryOrder(String userId, String orderId);
 
     void closeRefundOrder(String userId, String outTradeNo);
+
+    List<OrderEntity> queryWaitRefundOrderList();
 }

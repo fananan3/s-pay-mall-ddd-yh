@@ -1,5 +1,6 @@
 package cn.bugstack.infrastructure.gateway.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

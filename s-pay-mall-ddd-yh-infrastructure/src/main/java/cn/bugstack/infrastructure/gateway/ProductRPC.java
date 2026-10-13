@@ -13,7 +13,6 @@ import java.math.BigDecimal;
  */
 @Service
 public class ProductRPC {
-
     public ProductDTO queryProductByProductId(String productId){
         ProductDTO productDTO = new ProductDTO();
         productDTO.setProductId(productId);

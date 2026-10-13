@@ -47,8 +47,14 @@ public class NoPayNotifyOrderJob {
                 }
                 String code = response.getCode();
                 if (!"10000".equals(code)){
+                    // 交易不存在 = 用户压根没付款（订单只是创建了支付单），属于正常情况：
+                    // 后续交给超时关单 Job 处理即可，这里不要当异常刷 error 日志
+                    if ("ACQ.TRADE_NOT_EXIST".equals(response.getSubCode())) {
+                        log.info("订单 {} 支付宝无交易记录（用户未付款），跳过", orderId);
+                        continue;
+                    }
                     log.warn("订单 {} 查询失败：code={}, subCode={}, subMsg={}",orderId, code, response.getSubCode(), response.getSubMsg());
-                    // 交易不存在 → 用户根本没付款，可以考虑关单，但不要改支付成功
+                    // 其他失败：可能是网络/配置问题，下个周期重试
                     continue;
                 }
                 String tradeStatus = response.getTradeStatus();

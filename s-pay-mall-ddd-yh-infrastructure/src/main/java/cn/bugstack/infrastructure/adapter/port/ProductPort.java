@@ -88,8 +88,6 @@ public class ProductPort implements IProductPort {
                     .originalPrice(responseDTO.getOriginalPrice())
                     .build();
 
-
-
         }catch (Exception e){
             log.error("营销锁单失败{}", userId, e);
             return null;

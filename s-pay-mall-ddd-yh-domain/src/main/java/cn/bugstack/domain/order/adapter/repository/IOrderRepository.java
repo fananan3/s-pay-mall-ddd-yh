@@ -44,4 +44,8 @@ public interface IOrderRepository {
     boolean closeRefundOrder(String userId, String outTradeNo);
 
     void changeMarketOrderWaitSettlement(String orderId);
+
+    List<OrderEntity> queryWaitRefundOrderList();
+
+    void changeOrderWaitRefund(String userId, String orderId);
 }

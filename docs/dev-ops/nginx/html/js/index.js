@@ -506,18 +506,17 @@ function renderTeams(teamList) {
     teamTimers.forEach(function (timer) { clearInterval(timer); });
     teamTimers.length = 0;
 
-    const teams = mergeTeams(teamList);
+    // 只保留「还在拼」的团：已成团、已结束的一律不展示
+    const teams = mergeTeams(teamList).filter(isTeamInProgress);
     if (!teams.length) {
-        list.innerHTML = '<div class="team-empty">暂时没有进行中的拼团，点下面「开团购买」当团长吧～</div>';
+        list.innerHTML = TEAM_EMPTY_HTML;
         return;
     }
 
     list.innerHTML = teams.map(function (team, index) {
         const target = toNumber(team.targetCount) || 2;
-        const locked = toNumber(team.lockCount);
-        const complete = toNumber(team.completeCount);
         const members = teamMembers(team);
-        const joined = members ? members.length : Math.max(locked, complete);
+        const joined = teamJoinedCount(team);
         const lack = Math.max(0, target - joined);
         const progress = target > 0 ? Math.min(100, Math.round((joined / target) * 100)) : 0;
         const view = teamRowView(team);
@@ -597,6 +596,36 @@ function mergeTeams(teamList) {
     });
 }
 
+/** 「正在拼的团」列表为空时的提示 */
+const TEAM_EMPTY_HTML = '<div class="team-empty">暂时没有进行中的拼团，点下面「开团购买」当团长吧～</div>';
+
+/** 这个团实际的已参与人数：有成员明细以明细为准，否则用锁单/完成数兜底 */
+function teamJoinedCount(team) {
+    const members = teamMembers(team);
+    return members ? members.length : Math.max(toNumber(team.lockCount), toNumber(team.completeCount));
+}
+
+/** 团是否已经结束：优先用 validEndTime，没有则认接口给的「已结束」倒计时 */
+function isTeamExpired(team) {
+    const endDate = parseDate(team && team.validEndTime);
+    if (endDate) return endDate.getTime() <= Date.now();
+    return String((team && team.validTimeCountdown) || '').trim() === '已结束';
+}
+
+/**
+ * 这个团还算不算「正在拼」：没成团 + 没过期。
+ * 后端只该返回可参团的团，这里再兜一层，挡住两类脏数据：
+ *   1. 已成团 —— 已参与人数达到目标人数（成团后 status 变 1，但满员未结算的团仍是 0）
+ *   2. 已结束 —— 拼团有效时间已经过了（后端只挡了活动 end_time，没挡团的 valid_end_time）
+ * 页面停留期间团也会自然过期，靠 removeTeamRow 在倒计时归零时移除。
+ */
+function isTeamInProgress(team) {
+    const target = toNumber(team && team.targetCount);
+    if (target > 0 && teamJoinedCount(team) >= target) return false;
+    if (isTeamExpired(team)) return false;
+    return true;
+}
+
 /* 拼团订单明细状态：0 创建（待支付）/ 1 完成（已结算）/ 2 关闭 */
 const ORDER_STATUS = { CREATE: 0, COMPLETE: 1, CLOSE: 2 };
 
@@ -662,18 +691,13 @@ function toOrderStatus(value) {
 /** 每个团一个本地倒计时：优先用 validEndTime，接口给的 validTimeCountdown 兜底 */
 function startTeamCountdown(index, team) {
     const timeEl = document.getElementById('teamTime' + index);
-    const buttonEl = document.querySelector('.grab-btn[data-index="' + index + '"]');
     if (!timeEl) return;
 
     let seconds = remainingSeconds(team);
 
-    if (seconds <= 0) {
-        timeEl.innerText = team.validTimeCountdown || '已结束';
-        timeEl.classList.add('ending');
-        if (buttonEl) {
-            buttonEl.disabled = true;
-            buttonEl.dataset.locked = '1';
-        }
+    // 已经过期（或接口明确说已结束）：这个团不再是「正在拼的团」，直接不展示
+    if (seconds <= 0 && isTeamExpired(team)) {
+        removeTeamRow(timeEl);
         return;
     }
 
@@ -681,12 +705,8 @@ function startTeamCountdown(index, team) {
         seconds--;
         if (seconds <= 0) {
             clearInterval(timer);
-            timeEl.innerText = '已结束';
-            timeEl.classList.add('ending');
-            if (buttonEl) {
-                buttonEl.disabled = true;
-                buttonEl.dataset.locked = '1';
-            }
+            // 页面停留期间团自然过期 → 把这一行从「正在拼的团」移除
+            removeTeamRow(timeEl);
             return;
         }
         const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -697,6 +717,22 @@ function startTeamCountdown(index, team) {
     }, 1000);
 
     teamTimers.push(timer);
+}
+
+/** 团已过期：把这一行从「正在拼的团」里移除，列表空了就回到空态提示 */
+function removeTeamRow(timeEl) {
+    const item = timeEl && timeEl.closest ? timeEl.closest('.member-item') : null;
+    if (item && item.parentNode) {
+        item.parentNode.removeChild(item);
+    }
+    refreshTeamEmptyState();
+}
+
+function refreshTeamEmptyState() {
+    const list = document.getElementById('memberList');
+    if (!list) return;
+    if (list.querySelector('.member-item')) return;
+    list.innerHTML = TEAM_EMPTY_HTML;
 }
 
 function remainingSeconds(team) {

@@ -1,5 +1,6 @@
 package cn.bugstack.domain.order.model.entity;
 
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

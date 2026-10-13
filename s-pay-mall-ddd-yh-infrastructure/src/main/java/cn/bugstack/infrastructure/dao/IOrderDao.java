@@ -43,7 +43,8 @@ public interface IOrderDao {
                                       @Param("lastId") Long lastId,
                                       @Param("pageSize") Integer pageSize);
 
-    PayOrder queryOrderByUserIdAndOrderId(String userId, String orderId);
+    PayOrder queryOrderByUserIdAndOrderId(@Param("userId") String userId,
+                                          @Param("orderId") String orderIdString );
 
     boolean refundOrder(@Param("userId") String userId, @Param("orderId") String orderId);
 
@@ -52,4 +53,8 @@ public interface IOrderDao {
     boolean closeRefundOrder(String userId, String outTradeNo);
 
     void changeMarketOrderWaitSettlement(PayOrder payOrder);
+
+    List<PayOrder> queryWaitRefundOrderList();
+
+    boolean changeOrderWaitRefund(@Param("userId") String userId, @Param("orderId") String orderId);
 }

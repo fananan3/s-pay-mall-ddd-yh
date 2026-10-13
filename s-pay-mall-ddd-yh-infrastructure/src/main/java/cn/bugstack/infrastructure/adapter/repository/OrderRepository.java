@@ -252,4 +252,19 @@ public class OrderRepository implements IOrderRepository {
         payOrder.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
         orderDao.changeMarketOrderWaitSettlement(payOrder);
     }
+
+    @Override
+    public List<OrderEntity> queryWaitRefundOrderList() {
+        List<PayOrder> payOrderList = orderDao.queryWaitRefundOrderList();
+        if (null == payOrderList || payOrderList.isEmpty()) return new ArrayList<>();
+        return payOrderList.stream().map(po -> OrderEntity.builder()
+                .userId(po.getUserId())
+                .orderId(po.getOrderId())
+                .build()).collect(Collectors.toList());
+    }
+
+    @Override
+    public void changeOrderWaitRefund(String userId, String orderId) {
+        orderDao.changeOrderWaitRefund(userId, orderId);
+    }
 }

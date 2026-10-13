@@ -49,6 +49,11 @@
                     '账号：<span class="copyable" data-copy="kvhmoj3832@sandbox.com">kvhmoj3832@sandbox.com</span>（点击复制）<br>' +
                     '登录密码：111111　支付密码：111111' +
                 '</div>' +
+                '<div class="pay-warn">' +
+                    '<strong>跳转后提示「用户未登录」怎么办</strong>' +
+                    '请先退出当前浏览器的真实支付宝账号（或直接用<b>无痕窗口</b>打开本页），' +
+                    '跳转到沙箱收银台后再用上面的<b>沙箱买家账号</b>登录，即可正常支付。' +
+                '</div>' +
                 '<p class="qr-tip">点击「' + okText + '」将跳转到支付宝沙箱收银台</p>' +
                 '<div class="modal-footer">' +
                     '<button class="btn btn-ghost" id="payCancelBtn">取消</button>' +

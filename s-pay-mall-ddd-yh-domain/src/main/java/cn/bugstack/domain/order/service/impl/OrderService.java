@@ -8,6 +8,8 @@ import cn.bugstack.domain.order.model.entity.OrderEntity;
 import cn.bugstack.domain.order.model.entity.PayOrderEntity;
 import cn.bugstack.domain.order.model.valobj.MarketTypeVO;
 import cn.bugstack.domain.order.model.valobj.OrderStatusVO;
+import cn.bugstack.types.enums.ResponseCode;
+import cn.bugstack.types.exception.AppException;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
@@ -69,6 +71,13 @@ public class OrderService extends AbstractOrderService{
         request.setBizContent(bizContent.toString());
         String form = alipayClient.pageExecute(request).getBody();
 
+        // 表单生成失败（为空或不是 HTML 表单）时不要落库：坏表单存进 pay_url 后，
+        // 用户点支付会被支付宝收银台直接拒绝（例如返回 {"resultCode":"USER_NOT_LOGIN", ...} 这类信封）
+        if (null == form || !form.contains("<form")) {
+            log.error("支付宝支付表单生成失败 userId:{} orderId:{} form:{}", userId, orderId, form);
+            throw new AppException(ResponseCode.UN_ERROR.getCode(), "支付宝支付表单生成失败");
+        }
+
         PayOrderEntity payOrderEntity = new PayOrderEntity();
         payOrderEntity.setOrderId(orderId);
         payOrderEntity.setPayUrl(form);
@@ -101,11 +110,27 @@ public class OrderService extends AbstractOrderService{
         if(MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(orderEntity.getMarketType())){
             orderRepository.changeMarketOrderPaySuccess(orderId);
             // 发起营销结算。这个过程可以是http/rpc直接调用，也可以发一个商城交易支付完成的消息，之后拼团系统自己接收做结算。
-            try{
+            try {
                 productPort.settlementMarketPayOrder(orderEntity.getUserId(), orderId, payTime);
-            }catch (Exception e){
-                // 注意；在公司中，发起结算的http/rpc调用可能会失败，这个时候还会有增加job任务补偿。条件为，检查一笔走了拼团的订单，超过n分钟后，仍然没有做拼团结算状态变更。
-                // 我们这里失败了，会抛异常，借助支付宝回调/job来重试。你可以单独实现一个独立的job来处理。
+            } catch (AppException e) {
+                // 业务性拒绝：渠道黑名单(E0105) / 支付超期(E0106) —— 拼团永远不会结算/成团这笔单。
+                // 用户已经付了钱，必须自动退款并关单，否则会卡在「已支付未结算」。
+                if ("E0105".equals(e.getCode()) || "E0106".equals(e.getCode())) {
+                    log.error("拼团结算被拒，启动自动退款 orderId:{} code:{} msg:{}", orderId, e.getCode(), e.getInfo());
+                    try {
+                        refundPayOrder(orderEntity.getUserId(), orderId);
+                    } catch (Exception refundEx) {
+                        log.error("自动退款失败，标记待退款，交给退款补偿任务重试 orderId:{}", orderId, refundEx);
+                        orderRepository.changeOrderWaitRefund(orderEntity.getUserId(), orderId);
+                    }
+                    return;   // 已退款关单，不再置为支付成功
+                }
+                // 其它异常（网络等）：标记待结算，交给补偿任务重试
+                log.warn("拼团结算失败（非业务性拒绝），标记待结算 orderId:{}", orderId, e);
+                orderRepository.changeMarketOrderWaitSettlement(orderId);
+            } catch (Exception e) {
+                // 其它异常（网络等）：标记待结算，交给补偿任务重试
+                log.warn("拼团结算异常，标记待结算 orderId:{}", orderId, e);
                 orderRepository.changeMarketOrderWaitSettlement(orderId);
             }
 
@@ -202,6 +227,21 @@ public class OrderService extends AbstractOrderService{
             log.warn("退款失败，订单不存在或不属于该用户 userId:{} orderId:{}", userId, orderId);
             return false;
         }
+
+        // 2. 幂等：已关闭的订单直接返回成功，避免重复退款
+        if (OrderStatusVO.CLOSE.getCode().equals(orderEntity.getOrderStatusVO().getCode())) {
+            log.info("订单已关闭，退款幂等返回 userId:{} orderId:{}", userId, orderId);
+            return true;
+        }
+
+        // 3. 没收到过钱就没有交易可退：未支付订单直接关单，绝不能调支付宝退款，
+        //    否则必然返回 40004 / ACQ.TRADE_NOT_EXIST（交易不存在）
+        if (null == orderEntity.getPayTime()) {
+            log.info("订单未支付，无需支付宝退款，直接关单 userId:{} orderId:{}", userId, orderId);
+            return orderRepository.refundOrder(userId, orderId);   // status = CLOSE
+        }
+
+        // 4. 已支付：调用支付宝退款
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
         AlipayTradeRefundModel refundModel = new AlipayTradeRefundModel();
         refundModel.setOutTradeNo(orderEntity.getOrderId());
@@ -210,9 +250,15 @@ public class OrderService extends AbstractOrderService{
         request.setBizModel(refundModel);
 
         AlipayTradeRefundResponse execute = alipayClient.execute(request);
-        if (!execute.isSuccess()) return false;
+        if (!execute.isSuccess()) {
+            // 交易不存在(ACQ.TRADE_NOT_EXIST)、已全额退款 等属于业务性失败，重试也不会成功，需人工核对或对账
+            log.error("支付宝退款失败 userId:{} orderId:{} code:{} subCode:{} subMsg:{}",
+                    userId, orderId, execute.getCode(), execute.getSubCode(), execute.getSubMsg());
+            return false;
+        }
         // 状态变更
         orderRepository.refundOrder(userId, orderId);
+        log.info("支付宝退款成功 userId:{} orderId:{}", userId, orderId);
 
         return true;
     }
@@ -220,6 +266,11 @@ public class OrderService extends AbstractOrderService{
     @Override
     public OrderEntity queryOrder(String userId, String orderId) {
         return orderRepository.queryOrderByUserIdAndOrderId(userId, orderId);
+    }
+
+    @Override
+    public List<OrderEntity> queryWaitRefundOrderList() {
+        return orderRepository.queryWaitRefundOrderList();
     }
 
     @Override
