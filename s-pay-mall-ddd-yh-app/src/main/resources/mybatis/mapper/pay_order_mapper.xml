@@ -127,6 +127,12 @@
         order by id asc
         limit 100
     </select>
+    <select id="queryWaitSettlementOrderList" resultType="cn.bugstack.infrastructure.dao.po.PayOrder">
+        select user_id as userId, order_id as orderId, pay_time as payTime from pay_order
+        where status = 'WAIT_SETTLEMENT'
+        order by id asc
+        limit 100
+    </select>
     <update id="changeOrderWaitRefund">
         update pay_order set status = 'WAIT_REFUND', update_time = now()
         where user_id = #{userId} and order_id = #{orderId}

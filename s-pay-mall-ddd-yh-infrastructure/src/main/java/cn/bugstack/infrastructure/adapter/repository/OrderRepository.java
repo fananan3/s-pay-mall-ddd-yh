@@ -254,6 +254,17 @@ public class OrderRepository implements IOrderRepository {
     }
 
     @Override
+    public List<OrderEntity> queryWaitSettlementOrderList() {
+        List<PayOrder> payOrderList = orderDao.queryWaitSettlementOrderList();
+        if (null == payOrderList || payOrderList.isEmpty()) return new ArrayList<>();
+        return payOrderList.stream().map(po -> OrderEntity.builder()
+                .userId(po.getUserId())
+                .orderId(po.getOrderId())
+                .payTime(po.getPayTime())
+                .build()).collect(Collectors.toList());
+    }
+
+    @Override
     public List<OrderEntity> queryWaitRefundOrderList() {
         List<PayOrder> payOrderList = orderDao.queryWaitRefundOrderList();
         if (null == payOrderList || payOrderList.isEmpty()) return new ArrayList<>();

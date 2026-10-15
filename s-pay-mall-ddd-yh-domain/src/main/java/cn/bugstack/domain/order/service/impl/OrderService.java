@@ -128,10 +128,12 @@ public class OrderService extends AbstractOrderService{
                 // 其它异常（网络等）：标记待结算，交给补偿任务重试
                 log.warn("拼团结算失败（非业务性拒绝），标记待结算 orderId:{}", orderId, e);
                 orderRepository.changeMarketOrderWaitSettlement(orderId);
+                return;   // 标记待结算后提前返回，避免被后面的 changeOrderPaySuccess 覆盖回 PAY_SUCCESS
             } catch (Exception e) {
                 // 其它异常（网络等）：标记待结算，交给补偿任务重试
                 log.warn("拼团结算异常，标记待结算 orderId:{}", orderId, e);
                 orderRepository.changeMarketOrderWaitSettlement(orderId);
+                return;   // 标记待结算后提前返回，交给 SettlementRetryJob 重试
             }
 
         }
@@ -266,6 +268,11 @@ public class OrderService extends AbstractOrderService{
     @Override
     public OrderEntity queryOrder(String userId, String orderId) {
         return orderRepository.queryOrderByUserIdAndOrderId(userId, orderId);
+    }
+
+    @Override
+    public List<OrderEntity> queryWaitSettlementOrderList() {
+        return orderRepository.queryWaitSettlementOrderList();
     }
 
     @Override

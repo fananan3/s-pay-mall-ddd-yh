@@ -45,6 +45,8 @@ public interface IOrderRepository {
 
     void changeMarketOrderWaitSettlement(String orderId);
 
+    List<OrderEntity> queryWaitSettlementOrderList();
+
     List<OrderEntity> queryWaitRefundOrderList();
 
     void changeOrderWaitRefund(String userId, String orderId);

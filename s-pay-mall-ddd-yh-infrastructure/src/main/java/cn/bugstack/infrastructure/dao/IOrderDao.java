@@ -56,5 +56,7 @@ public interface IOrderDao {
 
     List<PayOrder> queryWaitRefundOrderList();
 
+    List<PayOrder> queryWaitSettlementOrderList();
+
     boolean changeOrderWaitRefund(@Param("userId") String userId, @Param("orderId") String orderId);
 }
