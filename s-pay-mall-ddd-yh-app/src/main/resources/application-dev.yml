@@ -29,6 +29,11 @@ thread:
 # 数据库配置；启动时配置数据库资源信息
 spring:
   datasource:
+    analytics:
+      username: root
+      password: 123456
+      url: jdbc:mysql://127.0.0.1:13306/analytics_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
+      driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
     # serverTimezone 必须与 MySQL 实例时区一致（本机 docker mysql 为 SYSTEM=+08:00，与拼团项目保持一致用 Asia/Shanghai）。

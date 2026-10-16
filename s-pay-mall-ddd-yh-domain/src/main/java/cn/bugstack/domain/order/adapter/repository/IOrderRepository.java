@@ -50,4 +50,6 @@ public interface IOrderRepository {
     List<OrderEntity> queryWaitRefundOrderList();
 
     void changeOrderWaitRefund(String userId, String orderId);
+
+    List<OrderEntity> queryIncrementalOrders(Long lastId, Integer limit);
 }

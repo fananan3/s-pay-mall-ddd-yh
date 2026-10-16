@@ -59,4 +59,6 @@ public interface IOrderDao {
     List<PayOrder> queryWaitSettlementOrderList();
 
     boolean changeOrderWaitRefund(@Param("userId") String userId, @Param("orderId") String orderId);
+
+    List<PayOrder> queryIncrementalOrders(@Param("lastId") Long lastId, @Param("limit") Integer limit);
 }

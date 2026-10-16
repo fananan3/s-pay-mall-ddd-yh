@@ -265,6 +265,22 @@ public class OrderRepository implements IOrderRepository {
     }
 
     @Override
+    public List<OrderEntity> queryIncrementalOrders(Long lastId, Integer limit) {
+        List<PayOrder> payOrderList = orderDao.queryIncrementalOrders(lastId, limit);
+        if (null == payOrderList || payOrderList.isEmpty()) return new ArrayList<>();
+        return payOrderList.stream().map(payOrder -> OrderEntity.builder()
+                .id(payOrder.getId())
+                .userId(payOrder.getUserId())
+                .orderId(payOrder.getOrderId())
+                .orderTime(payOrder.getOrderTime())
+                .payAmount(payOrder.getPayAmount())
+                .payTime(payOrder.getPayTime())
+                .orderStatusVO(OrderStatusVO.valueOf(payOrder.getStatus()))
+                .marketType(payOrder.getMarketType())
+                .build()).collect(Collectors.toList());
+    }
+
+    @Override
     public List<OrderEntity> queryWaitRefundOrderList() {
         List<PayOrder> payOrderList = orderDao.queryWaitRefundOrderList();
         if (null == payOrderList || payOrderList.isEmpty()) return new ArrayList<>();

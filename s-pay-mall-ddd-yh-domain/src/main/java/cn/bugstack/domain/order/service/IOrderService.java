@@ -50,4 +50,7 @@ public interface IOrderService {
     List<OrderEntity> queryWaitSettlementOrderList();
 
     List<OrderEntity> queryWaitRefundOrderList();
+
+    /** 商城订单增量同步到分析库（离线分析） */
+    void syncOrdersToAnalytics();
 }

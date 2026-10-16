@@ -1,6 +1,7 @@
 package cn.bugstack.domain.order.service.impl;
 
 import cn.bugstack.domain.order.adapter.port.IProductPort;
+import cn.bugstack.domain.order.adapter.repository.IAnalyticsRepository;
 import cn.bugstack.domain.order.adapter.repository.IOrderRepository;
 import cn.bugstack.domain.order.model.aggregate.CreateOrderAggregate;
 import cn.bugstack.domain.order.model.entity.MarketPayDiscountEntity;
@@ -38,6 +39,9 @@ public class OrderService extends AbstractOrderService{
 
     @Resource
     private AlipayClient alipayClient;
+
+    @Resource
+    private IAnalyticsRepository analyticsRepository;
 
 
     @Value("${alipay.notify_url}")
@@ -268,6 +272,25 @@ public class OrderService extends AbstractOrderService{
     @Override
     public OrderEntity queryOrder(String userId, String orderId) {
         return orderRepository.queryOrderByUserIdAndOrderId(userId, orderId);
+    }
+
+    @Override
+    public void syncOrdersToAnalytics() {
+        Long lastOrderId = analyticsRepository.getSyncCheckpoint();
+        if (null == lastOrderId) lastOrderId = 0L;
+        int batch = 500;
+        List<OrderEntity> orders;
+        do {
+            orders = orderRepository.queryIncrementalOrders(lastOrderId, batch);
+            if (null == orders || orders.isEmpty()) break;
+            for (OrderEntity order : orders) {
+                analyticsRepository.upsertFactOrder(order);
+                lastOrderId = order.getId();
+            }
+            analyticsRepository.updateSyncCheckpoint(lastOrderId);
+        } while (orders.size() == batch);
+        analyticsRepository.recomputeUserSummary();
+        log.info("商城订单同步分析库完成 lastOrderId:{}", lastOrderId);
     }
 
     @Override

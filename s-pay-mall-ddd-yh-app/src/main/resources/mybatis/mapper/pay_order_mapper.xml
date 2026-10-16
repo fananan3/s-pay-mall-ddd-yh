@@ -137,4 +137,12 @@
         update pay_order set status = 'WAIT_REFUND', update_time = now()
         where user_id = #{userId} and order_id = #{orderId}
     </update>
+    <select id="queryIncrementalOrders" resultType="cn.bugstack.infrastructure.dao.po.PayOrder">
+        SELECT id, user_id as userId, order_id as orderId, order_time as orderTime,
+               pay_amount as payAmount, pay_time as payTime, status, market_type as marketType
+        FROM pay_order
+        WHERE id > #{lastId}
+        ORDER BY id ASC
+        LIMIT #{limit}
+    </select>
 </mapper>
