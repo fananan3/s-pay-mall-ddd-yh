@@ -28,6 +28,15 @@ thread:
 
 # 数据库配置；启动时配置数据库资源信息
 spring:
+  application:
+    name: mall-service
+  config:
+    import: optional:nacos:mall-service.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        file-extension: yml
   datasource:
     analytics:
       username: root
@@ -137,3 +146,10 @@ logging:
   level:
     root: info
   config: classpath:logback-spring.xml
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000

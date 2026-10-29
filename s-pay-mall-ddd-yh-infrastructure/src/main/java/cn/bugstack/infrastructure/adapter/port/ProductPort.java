@@ -3,6 +3,7 @@ package cn.bugstack.infrastructure.adapter.port;
 import cn.bugstack.domain.order.adapter.port.IProductPort;
 import cn.bugstack.domain.order.model.entity.MarketPayDiscountEntity;
 import cn.bugstack.domain.order.model.entity.ProductEntity;
+import cn.bugstack.infrastructure.gateway.IGroupBuyMarketFeignClient;
 import cn.bugstack.infrastructure.gateway.IGroupBuyMarketService;
 import cn.bugstack.infrastructure.gateway.ProductRPC;
 import cn.bugstack.infrastructure.gateway.dto.*;
@@ -33,12 +34,19 @@ public class ProductPort implements IProductPort {
     @Value("${app.config.group-buy-market.notify-url}")
     private String notifyUrl;
 
-    private final IGroupBuyMarketService groupBuyMarketService;
+//    private final IGroupBuyMarketService groupBuyMarketService;
+
+    private final IGroupBuyMarketFeignClient groupBuyMarketFeignClient;
 
     private final ProductRPC productRPC;
 
-    public ProductPort(IGroupBuyMarketService groupBuyMarketService, ProductRPC productRPC) {
-        this.groupBuyMarketService = groupBuyMarketService;
+//    public ProductPort(IGroupBuyMarketService groupBuyMarketService, ProductRPC productRPC) {
+//        this.groupBuyMarketService = groupBuyMarketService;
+//        this.productRPC = productRPC;
+//    }
+
+    public ProductPort(IGroupBuyMarketFeignClient groupBuyMarketFeignClient, ProductRPC productRPC) {
+        this.groupBuyMarketFeignClient = groupBuyMarketFeignClient;
         this.productRPC = productRPC;
     }
 
@@ -71,9 +79,7 @@ public class ProductPort implements IProductPort {
 
         try{
             // 营销锁单
-            Call<Response<LockMarketPayOrderResponseDTO>> call = groupBuyMarketService.lockMarketPayOrder(requestDTO);
-            //获取结果
-            Response<LockMarketPayOrderResponseDTO> response = call.execute().body();
+            Response<LockMarketPayOrderResponseDTO> response = groupBuyMarketFeignClient.lockMarketPayOrder(requestDTO);
 
             log.info("营销锁单{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
             if (null == response) {return null;}
@@ -104,9 +110,8 @@ public class ProductPort implements IProductPort {
         requestDTO.setOutTradeTime(payTime);
 
         try{
-            Call<Response<SettlementMarketPayOrderResponseDTO>> responseCall = groupBuyMarketService.settlementMarketPayOrder(requestDTO);
-            //获取结果
-            Response<SettlementMarketPayOrderResponseDTO> response = responseCall.execute().body();
+            Response<SettlementMarketPayOrderResponseDTO> response = groupBuyMarketFeignClient.settlementMarketPayOrder(requestDTO);
+
             log.info("营销结算{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
             if (response == null){return;}
 
@@ -122,16 +127,15 @@ public class ProductPort implements IProductPort {
 
     @Override
     public void refundMarketPayOrder(String userId, String orderId) {
+
         RefundMarketPayOrderRequestDTO requestDTO = new RefundMarketPayOrderRequestDTO();
         requestDTO.setSource(source);
         requestDTO.setChannel(chanel);
         requestDTO.setUserId(userId);
         requestDTO.setOutTradeNo(orderId);
         try {
-            Call<Response<RefundMarketPayOrderResponseDTO>> call = groupBuyMarketService.refundMarketPayOrder(requestDTO);
+            Response<RefundMarketPayOrderResponseDTO> response = groupBuyMarketFeignClient.refundMarketPayOrder(requestDTO);
 
-            // 获取结果
-            Response<RefundMarketPayOrderResponseDTO> response = call.execute().body();
             log.info("营销退单{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
             if (null == response) return;
 
