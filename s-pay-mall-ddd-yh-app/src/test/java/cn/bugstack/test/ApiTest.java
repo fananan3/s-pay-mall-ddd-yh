@@ -47,6 +47,7 @@ public class ApiTest {
 
     @Test
     public void test_eventPublisher() throws InterruptedException {
+        System.out.println("测试评审服务开始");
         BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(
                 PaySuccessMessageEvent.PaySuccessMessage.builder()
                         .tradeNo("1100000111")
